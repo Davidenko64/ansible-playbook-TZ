@@ -1,0 +1,41 @@
+---
+- name: Create my env
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: Install docker
+    apt:
+      name:
+        - docker.io
+        - python3
+        - python-pip
+      state: present
+
+  - name: Pip install docker
+    pip:
+      name: docker
+      state: latest
+
+  - name: Pull docker image
+    docker_image:
+      name: gitlab/gitlab-ee:latest
+      source: pull
+
+  - name: Run gitlab container
+    docker_container:
+      name: gitlab
+      image: gitlab/gitlab-ee:latest
+      state: started
+      restart: yes
+      volumes:
+        - "/home/yaroslav/gitlab/logs:/var/log/gitlab"
+        - "/home/yaroslav/gitlab/config:/etc/gitlab"
+        - "/home/yaroslav/gitlab/data:/var/opt/gitlab"
+      ports:
+     # ssh port
+        - "2222:22"
+     # http port
+        - "80:80"
+     # https port
+        - "443:443"
